@@ -1,0 +1,65 @@
+---
+title: "Drug_Consumption"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+#
+```{r}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(reshape2)
+library(readr)
+```
+
+#import data
+```{r}
+drug_consumption = read.csv("drug_consumption.csv",sep=",",header = TRUE)
+summary(drug_consumption)
+```
+
+#EDA
+```{r}
+personal_feature = drug_consumption[,1:13]
+drug_use = drug_consumption[,14:32]
+
+alltable = as.data.frame(do.call("rbind",sapply(drug_use,table)))
+alltable$CL5[18]=0
+alltable$CL6[18]=0
+
+alltable = data.frame(t(rbind(level=names(alltable),alltable)))
+
+alltable_long=melt(alltable,id="level")
+ggplot(data=alltable_long, aes(x=level, y=as.numeric(value), group = variable, colour = variable)) +
+    geom_line() +
+    geom_point( size=3, shape=21, fill="white") +
+    ggtitle("Drug Consumption")+
+    ylab("count")+
+    theme(plot.title = element_text(hjust = 0.5))
+ggsave("Drug use.jpg",width=12,height=7)
+
+#personal
+#AGE#SEX
+ggplot(personal_feature,aes(x=as.factor(Age),fill=as.factor(Gender)))+geom_bar()+xlab("Age")
+
+#sex#EDU
+ggplot(personal_feature,aes(x=as.factor(Gender),fill=as.factor(Education)))+geom_bar()+xlab("Gender")
+#EDU#COUNTRY
+ggplot(personal_feature,aes(x=as.factor(Country),fill=as.factor(Education)))+geom_bar()+xlab("Country")
+ggsave("educoun.jpg",width=12,height=7)
+#country#ethic
+ggplot(personal_feature,aes(x=as.factor(Country),fill=as.factor(Ethnicity )))+geom_bar()+xlab("Country")
+
+#score
+ggplot(personal_feature,aes(x=as.factor(Ethnicity),y=personal_feature$Nscore))+geom_boxplot(colour="steelblue")+xlab("Ethnicity")+ylab("Nscore")
+```
+
+
+#missing value
+```{r}
+drug_consumption[294,]
+```
+
